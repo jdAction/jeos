@@ -44,6 +44,17 @@ public interface EosApi{
 
     TableRow getTableRows(String scope, String code, String table);
 
+    /**
+     * Reads a table range. Use it when a table holds more rows than one response may return
+     * (upstream pull request #10): {@code lower_bound}/{@code upper_bound} select the primary key
+     * range and {@code limit} caps the row count.
+     *
+     * @param lowerBound lower bound of the primary key, empty string for "from the beginning"
+     * @param upperBound upper bound of the primary key, empty string for "until the end"
+     * @param limit      maximum number of rows, a positive integer as string
+     */
+    TableRow getTableRows(String scope, String code, String table, String lowerBound, String upperBound, String limit);
+
     List<String> getCurrencyBalance(String code, String accountName, String symbol);
 
     AbiBinToJson abiBinToJson(String code, String action, String binargs);

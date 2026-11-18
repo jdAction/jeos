@@ -1,24 +1,39 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>io.jafka</groupId>
+  <groupId>io.github.jdaction</groupId>
   <artifactId>jeos</artifactId>
   <version>0.9.17</version>
+  <packaging>jar</packaging>
+
+  <name>jeos</name>
   <description>EOS Blockchain Java SDK</description>
+  <url>https://github.com/jdaction/jeos</url>
 
   <properties>
-    <com.squareup.retrofit2.version>2.5.0</com.squareup.retrofit2.version>
+    <com.squareup.retrofit2.version>3.0.0</com.squareup.retrofit2.version>
+    <com.squareup.okhttp3.version>4.12.0</com.squareup.okhttp3.version>
+    <com.fasterxml.jackson.version>2.21.5</com.fasterxml.jackson.version>
+    <org.jetbrains.kotlin.version>2.2.21</org.jetbrains.kotlin.version>
+    <org.projectlombok.version>1.18.46</org.projectlombok.version>
+    <org.slf4j.version>2.0.17</org.slf4j.version>
+    <junit.jupiter.version>5.11.4</junit.jupiter.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <compile.encoding>${project.build.sourceEncoding}</compile.encoding>
-    <compile.source>1.8</compile.source>
-    <compile.target>1.8</compile.target>
+    <compile.source>17</compile.source>
+    <compile.target>17</compile.target>
     <resources.encoding>${compile.encoding}</resources.encoding>
+    <github.owner>jdaction</github.owner>
+    <github.repo>jeos</github.repo>
   </properties>
+
   <scm>
-    <connection>scm:git:git@github.com:adyliu/jeos.git</connection>
-    <developerConnection>scm:git:git@github.com:adyliu/jeos.git</developerConnection>
-    <url>https://github.com/adyliu/jeos</url>
+    <connection>scm:git:https://github.com/${github.owner}/${github.repo}.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/${github.owner}/${github.repo}.git</developerConnection>
+    <url>https://github.com/${github.owner}/${github.repo}</url>
+    <tag>HEAD</tag>
   </scm>
+
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -26,6 +41,7 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+
   <developers>
     <developer>
       <id>imxylz</id>
@@ -37,12 +53,19 @@
       </roles>
     </developer>
   </developers>
+
   <dependencies>
 
     <dependency>
       <groupId>com.squareup.retrofit2</groupId>
       <artifactId>retrofit</artifactId>
       <version>${com.squareup.retrofit2.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.squareup.okhttp3</groupId>
+          <artifactId>okhttp</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -51,56 +74,80 @@
       <version>${com.squareup.retrofit2.version}</version>
     </dependency>
 
-    <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
     <dependency>
-        <groupId>com.squareup.okhttp3</groupId>
-        <artifactId>okhttp</artifactId>
-        <version>3.13.1</version>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>${com.squareup.okhttp3.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jetbrains.kotlin</groupId>
+          <artifactId>kotlin-stdlib-jdk8</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
-    <!-- <dependency> <groupId>com.squareup.okhttp3</groupId> <artifactId>logging-interceptor</artifactId> <version>3.10.0</version> 
-      </dependency> -->
-<!--     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>3.8.1</version>
-    </dependency> -->
-
     <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.2</version>
-      <scope>provided</scope>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib</artifactId>
+      <version>${org.jetbrains.kotlin.version}</version>
     </dependency>
 
-  <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12 -->
-  <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.26</version>
-  </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
 
-    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310 -->
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>2.9.8</version>
     </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jdk8</artifactId>
-      <version>2.9.8</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${org.projectlombok.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Library modules should depend on the SLF4J API, not ship a logging backend. -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${org.slf4j.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${com.fasterxml.jackson.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.6</version>
+        <version>3.3.1</version>
         <configuration>
           <encoding>${resources.encoding}</encoding>
         </configuration>
@@ -108,24 +155,29 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
+        <version>3.14.1</version>
         <configuration>
           <source>${compile.source}</source>
           <target>${compile.target}</target>
           <encoding>${compile.encoding}</encoding>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+      </plugin>
     </plugins>
   </build>
 
   <distributionManagement>
     <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <id>central</id>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
     </snapshotRepository>
     <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <id>central</id>
+      <url>https://central.sonatype.com/api/v1/publisher</url>
     </repository>
   </distributionManagement>
 
@@ -137,7 +189,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>2.2.1</version>
+            <version>3.3.1</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -150,7 +202,15 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.9.1</version>
+            <version>3.8.0</version>
+            <configuration>
+              <doclint>none</doclint>
+              <failOnError>false</failOnError>
+              <encoding>UTF-8</encoding>
+              <additionalOptions>
+                <additionalOption>-Xdoclint:none</additionalOption>
+              </additionalOptions>
+            </configuration>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
@@ -161,20 +221,15 @@
             </executions>
           </plugin>
           <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.7</version>
-            <extensions>true</extensions>
-            <configuration>
-              <serverId>sonatype-nexus-staging</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
-            </configuration>
-          </plugin>
-          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.4</version>
+            <version>3.2.7</version>
+            <configuration>
+              <gpgArguments>
+                <arg>--pinentry-mode</arg>
+                <arg>loopback</arg>
+              </gpgArguments>
+            </configuration>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -185,10 +240,19 @@
               </execution>
             </executions>
           </plugin>
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>0.7.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <autoPublish>false</autoPublish>
+              <waitUntil>validated</waitUntil>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
     </profile>
   </profiles>
-  <name>jeos</name>
-  <url>https://github.com/adyliu/jeos</url>
 </project>

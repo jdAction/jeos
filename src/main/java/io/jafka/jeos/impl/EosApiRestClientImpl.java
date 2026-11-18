@@ -108,6 +108,27 @@ public class EosApiRestClientImpl implements EosApi {
     }
 
     @Override
+    public TableRow getTableRows(String scope, String code, String table, String lowerBound, String upperBound, String limit){
+        LinkedHashMap<String, String> requestParameters = new LinkedHashMap<>(7);
+
+        requestParameters.put("scope", scope);
+        requestParameters.put("code", code);
+        requestParameters.put("table", table);
+        requestParameters.put("json", "true");
+        if (lowerBound != null) {
+            requestParameters.put("lower_bound", lowerBound);
+        }
+        if (upperBound != null) {
+            requestParameters.put("upper_bound", upperBound);
+        }
+        if (limit != null) {
+            requestParameters.put("limit", limit);
+        }
+
+        return EosApiServiceGenerator.executeSync(eosChainApiService.getTableRows(requestParameters));
+    }
+
+    @Override
     public List<String> getCurrencyBalance(String code, String accountName, String symbol){
         LinkedHashMap<String, String> requestParameters = new LinkedHashMap<>(3);
 

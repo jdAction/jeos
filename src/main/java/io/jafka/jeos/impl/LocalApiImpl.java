@@ -9,9 +9,7 @@ import io.jafka.jeos.core.common.transaction.TransactionAuthorization;
 import io.jafka.jeos.core.request.chain.json2bin.TransferArg;
 import io.jafka.jeos.core.request.chain.transaction.PushTransactionRequest;
 import io.jafka.jeos.util.KeyUtil;
-import io.jafka.jeos.util.Raw;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,6 +26,11 @@ public class LocalApiImpl implements LocalApi {
     }
 
     @Override
+    public String createPrivateKey(byte[] entropy) {
+        return KeyUtil.createPrivateKey(entropy);
+    }
+
+    @Override
     public String toPublicKey(String privateKey) {
         return KeyUtil.toPublicKey(privateKey);
     }
@@ -37,39 +40,40 @@ public class LocalApiImpl implements LocalApi {
         // ① pack transfer data
         TransferArg transferArg = new TransferArg(from, to, quantity, memo);
         String transferData = Packer.packTransfer(transferArg);
-        //
 
-        // ③ create the authorization
+        // ② create the authorization
         List<TransactionAuthorization> authorizations = Arrays.asList(new TransactionAuthorization(from, "active"));
 
-        // ④ build the all actions
+        // ③ build the action
         List<TransactionAction> actions = Arrays.asList(//
                 new TransactionAction(account, "transfer", authorizations, transferData)//
         );
+        return createTransaction(arg, privateKey, actions);
+    }
 
-        // ⑤ build the packed transaction
+    @Override
+    public PushTransactionRequest createTransaction(SignArg arg, String privateKey, List<TransactionAction> actions) {
         PackedTransaction packedTransaction = new PackedTransaction();
         packedTransaction.setExpiration(arg.getHeadBlockTime().plusSeconds(arg.getExpiredSecond()));
         packedTransaction.setRefBlockNum(arg.getLastIrreversibleBlockNum());
         packedTransaction.setRefBlockPrefix(arg.getRefBlockPrefix());
-        
+
         packedTransaction.setMaxNetUsageWords(0);
         packedTransaction.setMaxCpuUsageMs(0);
         packedTransaction.setDelaySec(0);
         packedTransaction.setActions(actions);
 
-        String hash = sign(privateKey, arg, packedTransaction);
+        String signature = sign(privateKey, arg, packedTransaction);
         PushTransactionRequest req = new PushTransactionRequest();
+        req.setCompression("none");
         req.setTransaction(packedTransaction);
-        req.setSignatures(Arrays.asList(hash));
+        req.setSignatures(Arrays.asList(signature));
         return req;
     }
 
     private String sign(String privateKey, SignArg arg, PackedTransaction t) {
-
-        Raw raw = Packer.packPackedTransaction(arg.getChainId(), t);
-        raw.pack(ByteBuffer.allocate(33).array());// TODO: what's this?
-        String hash = KeyUtil.signHash(privateKey, raw.bytes());
-        return hash;
+        // digest = sha256(chain_id || packed transaction || 32 zero bytes)
+        String digest = Packer.signDigest(arg.getChainId(), t);
+        return KeyUtil.signDigest(privateKey, digest);
     }
 }
